@@ -20,13 +20,16 @@ class Plot_Utils():
         ax.set_xlabel("x [cm]")
         ax.set_ylabel("y [cm]")
         ax.set_zlabel("z [cm]")
-        ax.scatter(self.x, self.y, self.z, marker="^")
+        ax.scatter(self.x, self.y, self.z, marker="o", s=10)
 
     def plot_2d(self):
         points = self.hull.points
         hull_points = points[self.hull.vertices]
         hp = np.vstack((hull_points, hull_points[0]))
-        print(f"area : {self._polygon_area(hp[:,0], hp[:,1])} [cm]")       
+        area = self._polygon_area(hp[:,0], hp[:,1])
+        radius = (area / np.pi) ** (0.5)
+        print(f"area : {area} [cm]")
+        print(f"radius : {radius}")   
 
         fig = plt.figure()
         plt.scatter(self.x, self.y, label="key points")
@@ -52,7 +55,11 @@ if __name__ == "__main__":
     L2 = get_dlt_parameter(X_gray_M, uv_gray)
 
     xyz3s = np.load('./data/np_xyz.npy')
-    x_kin, y_kin, z_kin = xyz3s[:,0] * 100 , xyz3s[:,1] * 100, xyz3s[:,2] * 100 # kinectから読み込み cm→m単位
+    x_kin, y_kin, z_kin = xyz3s[:,2] * 100 , xyz3s[:,1] * 100, xyz3s[:,0] * 100 # kinectから読み込み cm→m単位
+
+    with open("kinect_pos.txt", "w") as f:
+        for x, y, z in zip(x_kin, y_kin, z_kin):
+            f.write(f"{x}, {y}, {z} \n")
 
     data = pd.read_csv("./data/pair_plot_position/all_keypoints.txt", header=None)
     X_dlt, Y_dlt, Z_dlt = [], [], []
